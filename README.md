@@ -50,9 +50,15 @@ Create (or update) `crudapp/backend/.env`:
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/crudapp
+
+# Admin login (used by the frontend login page)
+ADMIN_USER=admin
+ADMIN_PASS=secret
 ```
 
 > If you use MongoDB Atlas, set `MONGO_URI` to your connection string.
+> 
+> You can change `ADMIN_USER`/`ADMIN_PASS` to secure the app.
 
 ### 3) Start the server
 

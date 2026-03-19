@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const authMiddleware = require('./middleware/auth');
 const TaskRoutes = require('./routes/tasks');
 
 const app = express();
@@ -15,8 +16,24 @@ app.use(express.json());
 // Serve frontend (static files)
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// API routes
-app.use('/api/tasks', TaskRoutes);
+// Login endpoint (public)
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    if (username !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASS) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = Buffer.from(`${username}:${password}`).toString('base64');
+    res.json({ token });
+});
+
+// API routes (protected)
+app.use('/api/tasks', authMiddleware, TaskRoutes);
 
 // Health check
 app.get('/', (req, res) => {

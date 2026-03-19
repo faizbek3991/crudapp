@@ -11,59 +11,83 @@
     <header>
       <h1>Tasks CRUD</h1>
       <p class="muted">Simple CRUD web app with MongoDB</p>
+      <button class="btn" id="logoutBtn" hidden>Logout</button>
     </header>
 
-    <section class="card">
-      <h2 id="formTitle">Create Task</h2>
-
-      <form id="taskForm">
-        <input type="hidden" id="taskId" />
-
+    <section class="card" id="loginSection">
+      <h2>Login</h2>
+      <form id="loginForm">
         <label>
-          Title
-          <input id="title" type="text" placeholder="e.g. Learn MERN" required />
+          Username
+          <input id="loginUsername" type="text" placeholder="admin" required />
         </label>
 
         <label>
-          Description
-          <textarea id="description" placeholder="Optional details..."></textarea>
-        </label>
-
-        <label class="checkbox">
-          <input id="isDone" type="checkbox" />
-          Mark as done
+          Password
+          <input id="loginPassword" type="password" placeholder="••••••" required />
         </label>
 
         <div class="actions">
-          <button type="submit" class="btn primary" id="submitBtn">Create</button>
-          <button type="button" class="btn" id="cancelBtn" hidden>Cancel</button>
+          <button type="submit" class="btn primary">Login</button>
         </div>
       </form>
+
+      <div id="loginStatus" class="status"></div>
     </section>
 
-    <section class="card">
-      <div class="row">
-        <h2>All Tasks</h2>
-        <button class="btn" id="refreshBtn">Refresh</button>
-      </div>
+    <section id="appSection">
+      <section class="card">
+        <h2 id="formTitle">Create Task</h2>
 
-      <div id="status" class="status"></div>
+        <form id="taskForm">
+          <input type="hidden" id="taskId" />
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Done</th>
-            <th class="right">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tasksTbody"></tbody>
-      </table>
+          <label>
+            Title
+            <input id="title" type="text" placeholder="e.g. Learn MERN" required />
+          </label>
+
+          <label>
+            Description
+            <textarea id="description" placeholder="Optional details..."></textarea>
+          </label>
+
+          <label class="checkbox">
+            <input id="isDone" type="checkbox" />
+            Mark as done
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="btn primary" id="submitBtn">Create</button>
+            <button type="button" class="btn" id="cancelBtn" hidden>Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <h2>All Tasks</h2>
+          <button class="btn" id="refreshBtn">Refresh</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Done</th>
+              <th class="right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tasksTbody"></tbody>
+        </table>
+      </section>
     </section>
 
     <footer class="muted">
-      Backend API: <code>http://localhost:5000/api/tasks</code>
+      Backend API: <code>/api/tasks</code>
     </footer>
   </div>
 

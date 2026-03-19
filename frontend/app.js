@@ -2,6 +2,14 @@
 const API_BASE = '/api/tasks';
 
 const elements = {
+  loginSection: document.getElementById('loginSection'),
+  loginForm: document.getElementById('loginForm'),
+  loginUsername: document.getElementById('loginUsername'),
+  loginPassword: document.getElementById('loginPassword'),
+  loginStatus: document.getElementById('loginStatus'),
+  logoutBtn: document.getElementById('logoutBtn'),
+  appSection: document.getElementById('appSection'),
+
   form: document.getElementById('taskForm'),
   title: document.getElementById('title'),
   description: document.getElementById('description'),
@@ -13,6 +21,32 @@ const elements = {
   tasksTbody: document.getElementById('tasksTbody'),
   formTitle: document.getElementById('formTitle'),
 };
+
+let authToken = localStorage.getItem('crudapp_token') || '';
+
+function getAuthHeader() {
+  if (!authToken) return {};
+  return { Authorization: `Basic ${authToken}` };
+}
+
+function showLogin(message) {
+  elements.loginSection.hidden = false;
+  elements.appSection.hidden = true;
+  elements.logoutBtn.hidden = true;
+  if (message) setLoginStatus(message, 'error');
+}
+
+function showApp() {
+  elements.loginSection.hidden = true;
+  elements.appSection.hidden = false;
+  elements.logoutBtn.hidden = false;
+  setLoginStatus('');
+}
+
+function setLoginStatus(message, type = 'info') {
+  elements.loginStatus.textContent = message;
+  elements.loginStatus.className = `status ${type}`;
+}
 
 function setStatus(message, type = 'info') {
   elements.status.textContent = message;
@@ -74,11 +108,23 @@ function renderTasks(tasks) {
   });
 }
 
+function getHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    ...getAuthHeader(),
+  };
+}
+
 async function fetchTasks() {
   try {
     setStatus('Loading tasks...', 'info');
-    const res = await fetch(API_BASE);
+    const res = await fetch(API_BASE, { headers: getHeaders() });
     const data = await res.json();
+
+    if (res.status === 401) {
+      showLogin('Please log in to view tasks.');
+      return;
+    }
 
     if (!res.ok) throw new Error(data.message || 'Failed to fetch tasks');
 
@@ -92,10 +138,16 @@ async function fetchTasks() {
 async function createTask(payload) {
   const res = await fetch(API_BASE, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify(payload),
   });
   const data = await res.json();
+
+  if (res.status === 401) {
+    showLogin('Please login to create tasks.');
+    throw new Error('Unauthorized');
+  }
+
   if (!res.ok) throw new Error(data.message || 'Failed to create task');
   return data;
 }
@@ -103,10 +155,16 @@ async function createTask(payload) {
 async function updateTask(id, payload) {
   const res = await fetch(`${API_BASE}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify(payload),
   });
   const data = await res.json();
+
+  if (res.status === 401) {
+    showLogin('Please login to update tasks.');
+    throw new Error('Unauthorized');
+  }
+
   if (!res.ok) throw new Error(data.message || 'Failed to update task');
   return data;
 }
@@ -117,8 +175,15 @@ async function deleteTask(id) {
   try {
     const res = await fetch(`${API_BASE}/${id}`, {
       method: 'DELETE',
+      headers: getHeaders(),
     });
     const data = await res.json();
+
+    if (res.status === 401) {
+      showLogin('Please login to delete tasks.');
+      throw new Error('Unauthorized');
+    }
+
     if (!res.ok) throw new Error(data.message || 'Failed to delete task');
     setStatus('Task deleted.', 'success');
     fetchTasks();
@@ -135,6 +200,59 @@ function startEdit(task) {
   elements.formTitle.textContent = 'Edit Task';
   elements.submitBtn.textContent = 'Update';
   elements.cancelBtn.hidden = false;
+}
+
+function setAuthToken(token) {
+  authToken = token || '';
+  if (authToken) {
+    localStorage.setItem('crudapp_token', authToken);
+  } else {
+    localStorage.removeItem('crudapp_token');
+  }
+}
+
+async function login(username, password) {
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || 'Login failed');
+  }
+
+  return data.token;
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+
+  const username = elements.loginUsername.value.trim();
+  const password = elements.loginPassword.value.trim();
+
+  if (!username || !password) {
+    setLoginStatus('Username and password are required.', 'error');
+    return;
+  }
+
+  try {
+    setLoginStatus('Logging in...', 'info');
+    const token = await login(username, password);
+    setAuthToken(token);
+    setLoginStatus('Logged in successfully.', 'success');
+    showApp();
+    fetchTasks();
+  } catch (err) {
+    setLoginStatus(err.message || 'Login failed', 'error');
+  }
+}
+
+function logout() {
+  setAuthToken('');
+  showLogin('Logged out.');
 }
 
 async function handleSubmit(event) {
@@ -170,6 +288,9 @@ async function handleSubmit(event) {
 }
 
 function init() {
+  elements.loginForm.addEventListener('submit', handleLogin);
+  elements.logoutBtn.addEventListener('click', logout);
+
   elements.form.addEventListener('submit', handleSubmit);
   elements.cancelBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -178,7 +299,13 @@ function init() {
   });
 
   document.getElementById('refreshBtn').addEventListener('click', fetchTasks);
-  fetchTasks();
+
+  if (authToken) {
+    showApp();
+    fetchTasks();
+  } else {
+    showLogin();
+  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
