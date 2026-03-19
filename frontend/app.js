@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:5000/api/tasks';
+// Use a relative API endpoint so the frontend works when served from any host.
+const API_BASE = '/api/tasks';
 
 const elements = {
   form: document.getElementById('taskForm'),
