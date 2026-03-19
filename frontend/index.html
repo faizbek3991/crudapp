@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mongo CRUD - Tasks</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Tasks CRUD</h1>
+      <p class="muted">Simple CRUD web app with MongoDB</p>
+    </header>
+
+    <section class="card">
+      <h2 id="formTitle">Create Task</h2>
+
+      <form id="taskForm">
+        <input type="hidden" id="taskId" />
+
+        <label>
+          Title
+          <input id="title" type="text" placeholder="e.g. Learn MERN" required />
+        </label>
+
+        <label>
+          Description
+          <textarea id="description" placeholder="Optional details..."></textarea>
+        </label>
+
+        <label class="checkbox">
+          <input id="isDone" type="checkbox" />
+          Mark as done
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="submitBtn">Create</button>
+          <button type="button" class="btn" id="cancelBtn" hidden>Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>All Tasks</h2>
+        <button class="btn" id="refreshBtn">Refresh</button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Done</th>
+            <th class="right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tasksTbody"></tbody>
+      </table>
+    </section>
+
+    <footer class="muted">
+      Backend API: <code>http://localhost:5000/api/tasks</code>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
